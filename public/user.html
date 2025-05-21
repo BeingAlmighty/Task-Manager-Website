@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager - User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .user-info {
+            margin-right: 20px;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background-color: #ddd;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab-button.active {
+            background-color: white;
+        }
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 4px 4px 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .task-details {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .task-details p {
+            margin: 5px 0;
+        }
+        .task-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .task-description {
+            color: #555;
+            margin: 10px 0;
+        }
+        .task-points {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .points-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .points-value {
+            font-size: 1.2em;
+            color: #4CAF50;
+        }
+        .remarks {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .position-1 {
+            background-color: #FFD700;
+            font-weight: bold;
+        }
+        .position-2 {
+            background-color: #C0C0C0;
+            font-weight: bold;
+        }
+        .position-3 {
+            background-color: #CD7F32;
+            font-weight: bold;
+        }
+        .current-user {
+            background-color: #e0f7fa;
+        }
+        .no-tasks {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        /* Responsive styles */
+        @media screen and (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+            }
+            
+            .header-right {
+                margin-top: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .tab-button {
+                width: 100%;
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+            
+            .tab-content {
+                padding: 10px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                min-width: 100px;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .task-details {
+                margin: 10px 0;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>User Dashboard</h1>
+        <div class="header-right">
+            <div class="user-info">Welcome, <span id="userName">User</span></div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tab-container">
+            <button class="tab-button active" onclick="openTab('myTasks')">My Tasks</button>
+            <button class="tab-button" onclick="openTab('leaderboard')">Leaderboard</button>
+        </div>
+
+        <!-- My Tasks Tab -->
+        <div id="myTasks" class="tab-content active">
+            <h2>My Assigned Tasks</h2>
+            <div id="tasksContainer">
+                <!-- Tasks will be loaded dynamically -->
+                <div class="no-tasks" id="noTasksMessage" style="display: none;">
+                    You don't have any tasks assigned yet.
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard" class="tab-content">
+            <h2>Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Total Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Leaderboard will be loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const userId = sessionStorage.getItem('userId');
+            const role = sessionStorage.getItem('role');
+            
+            if (!userId || role !== 'user') {
+                window.location.href = '/index.html';
+                return;
+            }
+            
+            // Set user name
+            document.getElementById('userName').textContent = sessionStorage.getItem('username');
+            
+            // Load initial data
+            loadMyTasks();
+            loadLeaderboard();
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = '/index.html';
+        });
+
+        // Tab functionality
+        function openTab(tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Load tasks for current user
+        async function loadMyTasks() {
+            try {
+                const userId = sessionStorage.getItem('userId');
+                const response = await fetch(`/api/users/${userId}/tasks`);
+                const tasks = await response.json();
+                
+                const tasksContainer = document.getElementById('tasksContainer');
+                const noTasksMessage = document.getElementById('noTasksMessage');
+                
+                // Clear existing content
+                tasksContainer.innerHTML = '';
+                
+                // Display message if no tasks
+                if (tasks.length === 0) {
+                    noTasksMessage.style.display = 'block';
+                    tasksContainer.appendChild(noTasksMessage);
+                    return;
+                }
+                
+                // Add each task
+                tasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-details';
+                    
+                    const pointsStatus = task.points !== null ? 
+                        `<div class="task-points">
+                            <span class="points-label">Points:</span>
+                            <span class="points-value">${task.points} / ${task.max_points}</span>
+                        </div>` : 
+                        `<div class="task-points">
+                            <span class="points-label">Points:</span>
+                            <span>Not yet evaluated</span>
+                        </div>`;
+                        
+                    const remarksSection = task.remarks ? 
+                        `<div class="remarks">
+                            <strong>Remarks:</strong> ${task.remarks}
+                        </div>` : '';
+                    
+                    taskElement.innerHTML = `
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-description">${task.description}</div>
+                        ${pointsStatus}
+                        ${remarksSection}
+                    `;
+                    
+                    tasksContainer.appendChild(taskElement);
+                });
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                alert('Failed to load your tasks. Please try again.');
+            }
+        }
+
+        // Load leaderboard
+        async function loadLeaderboard() {
+            try {
+                const currentUserId = sessionStorage.getItem('userId');
+                const response = await fetch('/api/leaderboard');
+                const leaderboard = await response.json();
+                
+                const leaderboardBody = document.getElementById('leaderboardBody');
+                leaderboardBody.innerHTML = '';
+                
+                // Add each user to leaderboard
+                leaderboard.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Add position-based styling
+                    if (index === 0) {
+                        row.className = 'position-1';
+                    } else if (index === 1) {
+                        row.className = 'position-2';
+                    } else if (index === 2) {
+                        row.className = 'position-3';
+                    }
+                    
+                    // Highlight current user
+                    if (user.id == currentUserId) {
+                        row.classList.add('current-user');
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${user.username}</td>
+                        <td>${user.totalScore}</td>
+                    `;
+                    
+                    leaderboardBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                alert('Failed to load leaderboard. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

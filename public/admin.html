@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager - Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .user-info {
+            margin-right: 20px;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background-color: #2196F3;
+            color: white;
+            font-weight: bold;
+            margin-right: 5px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab-button:hover {
+            background-color: #1976D2;
+        }
+        .tab-button.active {
+            background-color: #1565C0;
+        }
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 4px 4px 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #1565C0;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .action-buttons button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .edit-btn {
+            background-color: #2196F3;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .assign-btn {
+            background-color: #ff9800;
+        }
+        .status-assigned {
+            color: #4CAF50;
+        }
+        .status-unassigned {
+            color: #f44336;
+        }
+        .status-active {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        .status-completed {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-failed {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 70%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .add-btn {
+            background-color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .change-password-btn {
+            background-color: #ff9800;
+        }
+
+        .assign-points-btn {
+            background-color: #4CAF50;
+        }
+
+        .end-task-btn {
+            background-color: #f44336;
+            color: white;
+            margin-left: 5px;
+        }
+        
+        .end-task-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .bonus-points-btn {
+            background-color: #FF9800;
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+            }
+            
+            .header-right {
+                margin-top: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .tab-button {
+                width: 100%;
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+            
+            .tab-content {
+                padding: 10px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                min-width: 100px;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+                margin: 2px 0;
+            }
+            
+            .modal-content {
+                width: 90%;
+                margin: 10% auto;
+            }
+            
+            form .form-group {
+                margin-bottom: 15px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on mobile */
+            }
+            
+            #filterStatus, #filterUser {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Additional styles for extra small screens */
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .tab-button {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            
+            .action-buttons button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        <div class="header-right">
+            <div class="user-info">Welcome, <span id="adminName">Admin</span></div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tab-container">
+            <button class="tab-button active" onclick="openTab('taskBench')">Task Bench</button>
+            <button class="tab-button" onclick="openTab('createTask')">Create Task</button>
+            <button class="tab-button" onclick="openTab('userList')">User List</button>
+        </div>
+
+        <!-- Task Bench Tab -->
+        <div id="taskBench" class="tab-content active">
+            <h2>Task Bench</h2>
+            <div>
+                <label for="filterStatus">Filter by Status:</label>
+                <select id="filterStatus" onchange="filterTasks()">
+                    <option value="all">All</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="unassigned">Unassigned</option>
+                </select>
+                <label for="filterUser">Filter by User:</label>
+                <select id="filterUser" onchange="filterTasks()">
+                    <option value="all">All Users</option>
+                    <!-- Users will be loaded dynamically -->
+                </select>
+            </div>
+            <table id="taskTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Assigned To</th>
+                        <th>Max Points</th>
+                        <th>Points</th>
+                        <th>Remarks</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTableBody">
+                    <!-- Tasks will be loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Create Task Tab -->
+        <div id="createTask" class="tab-content">
+            <h2>Create New Task</h2>
+            <form id="createTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Title:</label>
+                    <input type="text" id="taskTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description:</label>
+                    <textarea id="taskDescription" name="description" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskMaxPoints">Maximum Points:</label>
+                    <input type="number" id="taskMaxPoints" name="maxPoints" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignedUser">Assign To:</label>
+                    <select id="assignedUser" name="assignedUserId">
+                        <option value="">-- Select User --</option>
+                        <!-- Users will be loaded dynamically -->
+                    </select>
+                </div>
+                <button type="submit">Create Task</button>
+            </form>
+        </div>
+
+        <!-- User List Tab -->
+        <div id="userList" class="tab-content">
+            <h2>User List</h2>
+            <button onclick="openCreateUserModal()" class="add-btn">Create New User</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Total Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- Users will be loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editTaskModal')">&times;</span>
+            <h2>Edit Task</h2>
+            <form id="editTaskForm">
+                <input type="hidden" id="editTaskId">
+                <div class="form-group">
+                    <label for="editTaskTitle">Title:</label>
+                    <input type="text" id="editTaskTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskDescription">Description:</label>
+                    <textarea id="editTaskDescription" name="description" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskMaxPoints">Maximum Points:</label>
+                    <input type="number" id="editTaskMaxPoints" name="maxPoints" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAssignedUser">Assign To:</label>
+                    <select id="editAssignedUser" name="assignedUserId">
+                        <option value="">-- Select User --</option>
+                        <!-- Users will be loaded dynamically -->
+                    </select>
+                </div>
+                <button type="submit">Update Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Points Modal -->
+    <div id="assignPointsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('assignPointsModal')">&times;</span>
+            <h2>Assign Points</h2>
+            <form id="assignPointsForm">
+                <input type="hidden" id="pointsTaskId">
+                <div class="form-group">
+                    <label for="taskPoints">Points (max: <span id="maxPointsDisplay">0</span>):</label>
+                    <input type="number" id="taskPoints" name="points" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="bonusPoints">Bonus Points (optional):</label>
+                    <input type="number" id="bonusPoints" name="bonus_points" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="taskRemarks">Remarks:</label>
+                    <textarea id="taskRemarks" name="remarks" rows="4"></textarea>
+                </div>
+                <button type="submit">Save & Complete Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('createUserModal')">&times;</span>
+            <h2>Create New User</h2>
+            <form id="createUserForm">
+                <div class="form-group">
+                    <label for="newUsername">Username:</label>
+                    <input type="text" id="newUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password:</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <button type="submit">Create User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
+            <h2>Change Password</h2>
+            <form id="changePasswordForm">
+                <input type="hidden" id="changePasswordUserId">
+                <div class="form-group">
+                    <label for="newUserPassword">New Password:</label>
+                    <input type="password" id="newUserPassword" required>
+                </div>
+                <button type="submit">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bonus Points Modal -->
+    <div id="bonusPointsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('bonusPointsModal')">&times;</span>
+            <h2>Award Bonus Points</h2>
+            <form id="bonusPointsForm">
+                <input type="hidden" id="bonusTaskId">
+                <div class="form-group">
+                    <label for="bonusPoints">Bonus Points:</label>
+                    <input type="number" id="bonusPoints" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="bonusRemarks">Remarks:</label>
+                    <textarea id="bonusRemarks" rows="4"></textarea>
+                </div>
+                <button type="submit">Award Bonus</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in as admin
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = sessionStorage.getItem('role');
+            if (!role || role !== 'admin') {
+                window.location.href = '/index.html';
+                return;
+            }
+            
+            // Set admin name
+            document.getElementById('adminName').textContent = sessionStorage.getItem('username');
+            
+            // Load initial data
+            loadUsers();
+            loadTasks();
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = '/index.html';
+        });
+
+        // Tab functionality
+        function openTab(tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Load users
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const users = await response.json();
+                
+                // Populate user select dropdowns
+                const assignedUserSelect = document.getElementById('assignedUser');
+                const editAssignedUserSelect = document.getElementById('editAssignedUser');
+                const filterUserSelect = document.getElementById('filterUser');
+                
+                // Clear existing options
+                assignedUserSelect.innerHTML = '<option value="">-- Select User --</option>';
+                editAssignedUserSelect.innerHTML = '<option value="">-- Select User --</option>';
+                filterUserSelect.innerHTML = '<option value="all">All Users</option>';
+                
+                // Add user options
+                users.forEach(user => {
+                    if (user.role !== 'admin') {
+                        const option1 = document.createElement('option');
+                        option1.value = user.id;
+                        option1.textContent = `${user.username}`;
+                        assignedUserSelect.appendChild(option1);
+                        
+                        const option2 = document.createElement('option');
+                        option2.value = user.id;
+                        option2.textContent = `${user.username}`;
+                        editAssignedUserSelect.appendChild(option2);
+                        
+                        const option3 = document.createElement('option');
+                        option3.value = user.id;
+                        option3.textContent = `${user.username}`;
+                        filterUserSelect.appendChild(option3);
+                    }
+                });
+                
+                // Populate user table
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
+                
+                users.forEach(user => {
+                    if (user.role !== 'admin') {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.totalScore || 0}</td>
+                            <td class="action-buttons">
+                                <button onclick="viewUserTasks(${user.id}, '${user.username}')">View Tasks</button>
+                                <button class="change-password-btn" onclick="openChangePasswordModal(${user.id})">Change Password</button>
+                            </td>
+                        `;
+                        userTableBody.appendChild(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+                alert('Failed to load users. Please try again.');
+            }
+        }
+
+        // Load tasks
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                const tasks = await response.json();
+                
+                // Populate task table
+                renderTaskTable(tasks);
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                alert('Failed to load tasks. Please try again.');
+            }
+        }
+
+        // Render task table with filtering
+        function renderTaskTable(tasks) {
+            const taskTableBody = document.getElementById('taskTableBody');
+            taskTableBody.innerHTML = '';
+            
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterUser = document.getElementById('filterUser').value;
+            
+            tasks.forEach(task => {
+                // Don't show completed or failed tasks
+                if (task.status === 'completed' || task.status === 'failed') return;
+                
+                // Apply filters
+                if (filterStatus !== 'all') {
+                    if (filterStatus === 'assigned' && !task.assigned_user_id) return;
+                    if (filterStatus === 'unassigned' && task.assigned_user_id) return;
+                }
+                
+                if (filterUser !== 'all' && task.assigned_user_id != filterUser) return;
+                
+                const row = document.createElement('tr');
+                
+                const statusClass = task.assigned_user_id ? 'status-active' : 'status-unassigned';
+                const statusText = task.assigned_user_id ? 'Assigned' : 'Not Assigned';
+                
+                row.innerHTML = `
+                    <td>${task.id}</td>
+                    <td>${task.title}</td>
+                    <td>${task.assignedUserName || '-'}</td>
+                    <td>${task.max_points}</td>
+                    <td>${task.points !== null ? 
+                        `${task.points + (task.bonus_points || 0)} (Base: ${task.points} + Bonus: ${task.bonus_points || 0})` : 
+                        '-'}</td>
+                    <td>${task.remarks || '-'}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td class="action-buttons">
+                        <button class="edit-btn" onclick="openEditTaskModal(${task.id})">Edit</button>
+                        ${task.assigned_user_id ? `
+                            <button class="assign-points-btn" onclick="openAssignPointsModal(${task.id}, ${task.max_points})">
+                                Assign Points & Complete
+                            </button>
+                            <button class="end-task-btn" onclick="endTask(${task.id})">
+                                End Task
+                            </button>
+                        ` : ''}
+                    </td>
+                `;
+                taskTableBody.appendChild(row);
+            });
+        }
+
+        // Filter tasks
+        function filterTasks() {
+            loadTasks();
+        }
+
+        // Create task form submit
+        document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('taskTitle').value.trim(),
+                description: document.getElementById('taskDescription').value.trim(),
+                maxPoints: parseInt(document.getElementById('taskMaxPoints').value),
+                assignedUserId: document.getElementById('assignedUser').value || null
+            };
+            
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to create task');
+                }
+                
+                document.getElementById('createTaskForm').reset();
+                await loadTasks();
+                openTab('taskBench');
+                alert('Task created successfully!');
+            } catch (error) {
+                console.error('Error creating task:', error);
+                alert(error.message);
+            }
+        });
+
+        // Edit task form submit
+        document.getElementById('editTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const taskId = document.getElementById('editTaskId').value;
+            const title = document.getElementById('editTaskTitle').value;
+            const description = document.getElementById('editTaskDescription').value;
+            const maxPoints = document.getElementById('editTaskMaxPoints').value;
+            const assignedUserId = document.getElementById('editAssignedUser').value;
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        maxPoints,
+                        assignedUserId: assignedUserId || null
+                    })
+                });
+                
+                if (response.ok) {
+                    // Close modal
+                    closeModal('editTaskModal');
+                    // Reload tasks
+                    loadTasks();
+                    alert('Task updated successfully!');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to update task');
+                }
+            } catch (error) {
+                console.error('Error updating task:', error);
+                alert('Failed to update task. Please try again.');
+            }
+        });
+
+        // Update the assign points form handler
+        document.getElementById('assignPointsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const taskId = document.getElementById('pointsTaskId').value;
+            const points = parseInt(document.getElementById('taskPoints').value);
+            const bonusPoints = parseInt(document.getElementById('bonusPoints').value) || 0;
+            const remarks = document.getElementById('taskRemarks').value;
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/points`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        points,
+                        bonus_points: bonusPoints,
+                        remarks
+                    })
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to assign points');
+                }
+                
+                // Close modal and reload data
+                closeModal('assignPointsModal');
+                document.getElementById('assignPointsForm').reset();
+                await Promise.all([
+                    loadTasks(),
+                    loadUsers() // Reload users to update leaderboard
+                ]);
+                alert('Points assigned and task completed successfully!');
+            } catch (error) {
+                console.error('Error assigning points:', error);
+                alert(error.message);
+            }
+        });
+
+        // Add this function to handle ending a task
+        async function endTask(taskId) {
+            if (!confirm('Are you sure you want to end this task without points? This cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/end`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'failed',
+                        remarks: 'Task ended without points'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to end task');
+                }
+                
+                await loadTasks();
+                alert('Task ended successfully');
+            } catch (error) {
+                console.error('Error ending task:', error);
+                alert('Failed to end task. Please try again.');
+            }
+        }
+
+        // Open edit task modal
+        async function openEditTaskModal(taskId) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`);
+                const task = await response.json();
+                
+                document.getElementById('editTaskId').value = task.id;
+                document.getElementById('editTaskTitle').value = task.title;
+                document.getElementById('editTaskDescription').value = task.description;
+                document.getElementById('editTaskMaxPoints').value = task.maxPoints;
+                document.getElementById('editAssignedUser').value = task.assignedUserId || '';
+                
+                document.getElementById('editTaskModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading task:', error);
+                alert('Failed to load task details. Please try again.');
+            }
+        }
+
+        // Open assign points modal
+        function openAssignPointsModal(taskId, maxPoints) {
+            document.getElementById('pointsTaskId').value = taskId;
+            document.getElementById('maxPointsDisplay').textContent = maxPoints;
+            document.getElementById('taskPoints').max = maxPoints;
+            
+            document.getElementById('assignPointsModal').style.display = 'block';
+        }
+
+        // View user tasks
+        function viewUserTasks(userId, username) {
+            // You can implement a modal or redirect to a user-specific page
+            alert(`Viewing tasks for user: ${username} (ID: ${userId})\nThis feature is not implemented in this demo.`);
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let i = 0; i < modals.length; i++) {
+                if (event.target === modals[i]) {
+                    modals[i].style.display = 'none';
+                }
+            }
+        }
+
+        // Open create user modal
+        function openCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'block';
+        }
+
+        // Open change password modal
+        function openChangePasswordModal(userId) {
+            document.getElementById('changePasswordUserId').value = userId;
+            document.getElementById('changePasswordModal').style.display = 'block';
+        }
+
+        // Create user form submission
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password, role: 'user' })
+                });
+                
+                if (response.ok) {
+                    closeModal('createUserModal');
+                    document.getElementById('createUserForm').reset();
+                    loadUsers();
+                    alert('User created successfully!');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert('Failed to create user. Please try again.');
+            }
+        });
+
+        // Change password form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('changePasswordUserId').value;
+            const newPassword = document.getElementById('newUserPassword').value;
+            
+            try {
+                const response = await fetch(`/api/users/${userId}/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: newPassword })
+                });
+                
+                if (response.ok) {
+                    closeModal('changePasswordModal');
+                    document.getElementById('changePasswordForm').reset();
+                    alert('Password updated successfully!');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to update password');
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+                alert('Failed to update password. Please try again.');
+            }
+        });
+
+        // Add this to your script section
+        document.getElementById('bonusPointsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const taskId = document.getElementById('bonusTaskId').value;
+            const bonusPoints = document.getElementById('bonusPoints').value;
+            const remarks = document.getElementById('bonusRemarks').value;
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/bonus`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bonus_points: bonusPoints,
+                        remarks: remarks
+                    })
+                });
+                
+                if (response.ok) {
+                    closeModal('bonusPointsModal');
+                    document.getElementById('bonusPointsForm').reset();
+                    loadTasks();
+                    alert('Bonus points awarded successfully!');
+                } else {
+                    throw new Error('Failed to award bonus points');
+                }
+            } catch (error) {
+                console.error('Error awarding bonus points:', error);
+                alert('Failed to award bonus points. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
