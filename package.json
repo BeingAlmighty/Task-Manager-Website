@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "npm rebuild sqlite3 && echo 'Build complete'",
+    "postinstall": "npm rebuild sqlite3",
     "dev": "nodemon server.js"
   }
 }
